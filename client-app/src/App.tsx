@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {List, Header } from 'semantic-ui-react'
-import logo from './logo.svg';
 import './App.css';
 import axios from 'axios';
 
