@@ -11,12 +11,14 @@ interface Props {
   closeEdit: () => void;
   activity: Activity | undefined;
   createOrEdit: (activity: Activity) => void;
+  submitting: boolean;
 }
 
 export default function ActivityForm({
   closeEdit,
   activity: selectedActivity,
   createOrEdit,
+  submitting
 }: Props) {
   const initialState = selectedActivity ?? {
     id: "",
@@ -30,9 +32,9 @@ export default function ActivityForm({
 
   const [activity, setActivity] = useState(initialState);
   const submitHandler = (event: FormEvent) => {
-      event.preventDefault();
-    
-    createOrEdit(activity)
+    event.preventDefault();
+
+    createOrEdit(activity);
   };
   const inputChangeHandler = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -65,6 +67,7 @@ export default function ActivityForm({
         />
         <Form.Input
           placeholder="Date"
+          type="date"
           value={activity.date}
           name="date"
           onChange={inputChangeHandler}
@@ -81,7 +84,13 @@ export default function ActivityForm({
           name="venue"
           onChange={inputChangeHandler}
         />
-        <Button floated="right" positive type="submit" content="Submit" />
+        <Button
+          loading={submitting}
+          floated="right"
+          positive
+          type="submit"
+          content="Submit"
+        />
         <Button
           floated="right"
           type="button"
