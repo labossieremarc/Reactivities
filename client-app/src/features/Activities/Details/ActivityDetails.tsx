@@ -29,7 +29,7 @@ const ActivityDetails = () => {
         <ActivityDetailsChat />
       </Grid.Column>
       <GridColumn width={6}>
-        <ActivityDetailsSidebar />
+        <ActivityDetailsSidebar activity={selectedActivity}/>
       </GridColumn>
     </Grid>
   );

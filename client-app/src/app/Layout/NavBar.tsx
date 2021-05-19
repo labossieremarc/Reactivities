@@ -7,7 +7,7 @@ import { useStore } from "../stores/store";
 const NavBar = () => {
   const {userStore: {user, logout}} = useStore();
   return (
-    <Menu inverted fixed="top">
+    <Menu inverted fixed="top" >
       <Container>
         <Menu.Item as={NavLink} to="/" exact header>
           <img
