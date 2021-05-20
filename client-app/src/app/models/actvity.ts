@@ -23,7 +23,7 @@ export class Activity implements Activity {
 }
 
 export class ActivityFormValues {
-  id?: string = undefined;
+  id?: string = '';
   title: string = "";
   category: string = "";
   description: string = "";
