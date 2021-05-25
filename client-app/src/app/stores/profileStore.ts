@@ -1,4 +1,5 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import { flattenDiagnosticMessageText } from "typescript";
 import agent from "../api/agent";
 import { Photo, Profile } from "../models/profile";
 import { store } from "./store";
@@ -9,17 +10,21 @@ export default class ProfileStore {
   uploading: boolean = false;
   loadingMainPhoto: boolean = false;
   deleting: boolean = false;
+  updating: boolean = false;
 
   constructor() {
     makeAutoObservable(this);
   }
-
+  
   get isCurrentUser() {
     if (store.userStore.user && this.profile)
-      return store.userStore.user.username === this.profile.username;
+    return store.userStore.user.username === this.profile.username;
     else return false;
   }
-
+  resetProfile = () => {
+    this.profile = null;
+  }
+  
   loadProfile = async (username: string) => {
     this.loading = true;
     try {
@@ -88,4 +93,20 @@ export default class ProfileStore {
       console.log(error);
     }
   };
+  updateProfile = async (profile: Partial<Profile>) => {
+    this.updating = true;
+    try {
+      await agent.Profiles.updateProfile(profile);
+      runInAction(() => {
+        if (profile.displayName && profile.displayName !== store.userStore.user?.displayName) {
+          store.userStore.setDisplayName(profile.displayName)
+        }
+        this.profile = { ...this.profile, ...profile as Profile }
+        this.updating = false;
+      })
+    } catch (error) {
+      console.log(error)
+      runInAction(() => this.updating = false);
+    }
+  }
 }

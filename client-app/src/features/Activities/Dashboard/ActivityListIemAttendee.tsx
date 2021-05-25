@@ -31,7 +31,7 @@ const ActivityListItemAttendee = ({attendees} : Props) => {
             }
           >
             <Popup.Content>
-              <ProfileCard />
+            <ProfileCard profile={attendee}/>
             </Popup.Content>
           </Popup>
       ))}
