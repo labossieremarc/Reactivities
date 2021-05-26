@@ -13,12 +13,12 @@ import ActivityDetailsSidebar from "./ActivityDetailsSidebar";
 const ActivityDetails = () => {
   const {id} = useParams<{id: string}>();
   const { activityStore } = useStore();
-  const { selectedActivity, loadActivity, loadingInitial } = activityStore;
+  const { selectedActivity, loadActivity, loadingInitial, clearSelectedActivity } = activityStore;
   
   useEffect(() => {
     if (id) loadActivity(id)
-
-  }, [id, loadActivity]);
+    return () => clearSelectedActivity();
+  }, [id, loadActivity, clearSelectedActivity]);
   
   if (loadingInitial || !selectedActivity) return <LoadingComponent />;
   return (
@@ -26,7 +26,7 @@ const ActivityDetails = () => {
       <Grid.Column width={10}>
         <ActivityDetailsHeader activity={selectedActivity} />
         <ActivityDetailsInfo activity={selectedActivity} />
-        <ActivityDetailsChat />
+        <ActivityDetailsChat activityId={selectedActivity.id}/>
       </Grid.Column>
       <GridColumn width={6}>
         <ActivityDetailsSidebar activity={selectedActivity}/>
