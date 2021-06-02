@@ -1,7 +1,7 @@
 import { format } from "date-fns";
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Icon, Item, Label, Segment,  } from "semantic-ui-react";
+import { Accordion, Button, Icon, Item, Label, Segment,  } from "semantic-ui-react";
 import { Activity } from "../../../app/models/actvity";
 import ActivityListIemAttendee from "./ActivityListIemAttendee";
 
@@ -10,21 +10,40 @@ interface Props {
 }
 
 const ActivityListItem = ({ activity }: Props) => {
+  const [index] = useState<number>(0);
+  const [activeIndex, setActiveIndex] = useState<boolean>(false)
+
+  const accordianHandle = () => {
+    setActiveIndex(prevState => !prevState)
+  }
   return (
     <Segment.Group>
       <Segment>
-        {activity.isCancelled && 
-          <Label attached='top' color='red' content='Cancelled' style={{textAlign: 'center'}}/>
-        }
+        {activity.isCancelled && (
+          <Label
+            attached="top"
+            color="red"
+            content="Cancelled"
+            style={{ textAlign: "center" }}
+          />
+        )}
         <Item.Group>
           <Item>
-            <Item.Image style={{marginBottom: 3}} size="tiny" circular src={activity.host?.image || "/assets/user.png"} />
+            <Item.Image
+              style={{ marginBottom: 3 }}
+              size="tiny"
+              circular
+              src={activity.host?.image || "/assets/user.png"}
+            />
             <Item.Content>
               <Item.Header as={Link} to={`/activities/${activity.id}`}>
                 {activity.title}
               </Item.Header>
               <Item.Description>
-                Hosted by <Link to={`/profiles/${activity.host!.username}`}>{activity.host?.displayName}</Link>
+                Hosted by{" "}
+                <Link to={`/profiles/${activity.host!.username}`}>
+                  {activity.host?.displayName}
+                </Link>
               </Item.Description>
               {activity.isHost && (
                 <Item.Description>
@@ -50,9 +69,21 @@ const ActivityListItem = ({ activity }: Props) => {
           <Icon name="marker" /> {activity.venue}
         </span>
       </Segment>
-      <Segment secondary>
-        <ActivityListIemAttendee attendees={activity.attendees!} />
-      </Segment>
+      <Accordion>
+        <Accordion.Title
+          active={activeIndex}
+          index={index}
+          onClick={accordianHandle}
+        >
+          <Icon name="address card" />
+          <span>People going: {activity.attendees.length}</span>
+        </Accordion.Title>
+        <Accordion.Content active={activeIndex}>
+          <Segment secondary>
+            <ActivityListIemAttendee attendees={activity.attendees!} />
+          </Segment>
+        </Accordion.Content>
+      </Accordion>
       <Segment clearing>
         <span>{activity.description}</span>
         <Button

@@ -9,14 +9,19 @@ import ProfileHeader from "./ProfileHeader";
 
 const ProfilePage = () => {
   const { profileStore } = useStore();
-  const { profile, loadProfile, loading } = profileStore;
+  const { profile, loadProfile, loadingProfile, setActiveTab} = profileStore;
   const { username } = useParams<{ username: string }>();
+
+
 
   useEffect(() => {
     loadProfile(username);
-  }, [username, loadProfile]);
+    return () => {
+      setActiveTab(0);
+    }
+  }, [username, loadProfile, setActiveTab]);
 
-  if (loading) return <LoadingComponent />;
+  if (loadingProfile) return <LoadingComponent />;
   else
     return (
       <Grid>
@@ -24,7 +29,7 @@ const ProfilePage = () => {
           {profile && (
             <>
               <ProfileHeader />
-              <ProfileContent profile={profile} />
+              <ProfileContent />
             </>
           )}
         </Grid.Column>

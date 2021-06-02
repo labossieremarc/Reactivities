@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Core;
+using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -14,14 +15,16 @@ namespace Application.Comments
 {
     public class List
     {
-        public class Query : IRequest<Result<List<CommentDto>>> {
+        public class Query : IRequest<Result<List<CommentDto>>>
+        {
             public Guid ActivityId { get; set; }
-         }
+        }
 
         public class Handler : IRequestHandler<Query, Result<List<CommentDto>>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
+
             public Handler(DataContext context, IMapper mapper)
             {
                 _mapper = mapper;

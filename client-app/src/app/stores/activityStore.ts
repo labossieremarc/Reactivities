@@ -5,7 +5,7 @@ import { Activity, ActivityFormValues } from "../models/actvity";
 import { Profile } from "../models/profile";
 import { store } from "./store";
 
-export default class AcivityStore {
+export default class ActivityStore {
   activityRegistry = new Map<string, Activity>();
   selectedActivity: Activity | undefined = undefined;
   editMode = false;
@@ -33,11 +33,11 @@ export default class AcivityStore {
     );
   }
 
+
   loadActivities = async () => {
     this.setLoadingInitial(true);
     try {
-      const activities = await agent.Activities.list();
-
+      let activities = await agent.Activities.list();
       activities.forEach((activity) => {
         this.setActivity(activity);
       });
@@ -176,5 +176,16 @@ export default class AcivityStore {
 
   clearSelectedActivity = () => {
     this.selectedActivity = undefined;
+  }
+
+  updateAttendeeFollowing = (username: string) => {
+    this.activityRegistry.forEach(activity => {
+      activity.attendees.forEach(attendee => {
+        if (attendee.username === username) {
+          attendee.following ? attendee.followersCount-- : attendee.followersCount++;
+          attendee.following = !attendee.following
+        }
+      })
+    })
   }
 }

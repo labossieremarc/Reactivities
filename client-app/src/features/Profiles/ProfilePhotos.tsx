@@ -13,10 +13,9 @@ const ProfilePhotos = () => {
       profile,
       uploadPhoto,
       uploading,
-      loadingMainPhoto,
+      loading,
       setMainPhoto,
-      deletePhoto,
-      deleting
+      deletePhoto
     },
   } = useStore();
   const [addPhotoMode, setAddPhotoMode] = useState(false);
@@ -75,14 +74,14 @@ const ProfilePhotos = () => {
                         icon="eye"
                         name={'main' + photo.id}
                         disabled={photo.isMain}
-                        loading={target === 'main' + photo.id && loadingMainPhoto}
+                        loading={target === 'main' + photo.id && loading}
                         onClick={(e) => setMainPhotoHandler(photo, e)}
                       />
                       <Button
                         basic
                         disabled={photo.isMain}
                         name={photo.id}
-                        loading={target === photo.id && deleting}
+                        loading={target === photo.id && loading}
                         color="red"
                         icon="trash"
                         onClick={(e) => deletePhotoHandler(photo, e)}

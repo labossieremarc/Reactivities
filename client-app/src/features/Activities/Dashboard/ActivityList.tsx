@@ -5,6 +5,7 @@ import { Header} from "semantic-ui-react";
 import { useStore } from "../../../app/stores/store";
 import ActivityListItem from "./AcivityListItem";
 
+
 const ActivityList = () => {
   const { activityStore } = useStore();
   const { groupedActivities } = activityStore;

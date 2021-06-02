@@ -2,11 +2,10 @@ import { Formik, Form, Field, FieldProps } from "formik";
 import { observer } from "mobx-react-lite";
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Segment, Header, Comment, Button, Loader } from "semantic-ui-react";
-import MyTextArea from "../../../app/common/form/MyTextArea";
+import { Segment, Header, Comment, Loader } from "semantic-ui-react";
 import { useStore } from "../../../app/stores/store";
 import * as Yup from 'yup'
-import { formatDistance, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 
 interface Props {
   activityId: string;

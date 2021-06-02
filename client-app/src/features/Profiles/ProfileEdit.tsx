@@ -34,7 +34,7 @@ const ProfileDescription = ({setEditMode}:Props) => {
       validationSchema={validationSchema}
     >
       {({ isSubmitting, isValid, dirty }) => (
-        <Form className="ui form">
+        <Form className="ui form" >
           <MyTextInput name="displayName" placeholder="Display Name" />
           <MyTextArea placeholder="Add your Bio" name="bio" rows={5} />
           <Button

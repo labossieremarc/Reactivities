@@ -5,6 +5,8 @@ import { Header, Menu} from "semantic-ui-react";
 
 
 const ActivityFilters = () => {
+ 
+  
   return (
     <>
       <Menu
