@@ -17,6 +17,7 @@ const ActivityListItem = ({ activity }: Props) => {
   const accordianHandle = () => {
     setActiveIndex(prevState => !prevState)
   }
+  const styles = {background: 'blue'}
   return (
     <Segment.Group>
       <Segment>
@@ -33,7 +34,6 @@ const ActivityListItem = ({ activity }: Props) => {
             <Item.Image
               style={{ marginBottom: 3 }}
               size="tiny"
-              circular
               src={activity.host?.image || "/assets/user.png"}
             />
             <Item.Content>
