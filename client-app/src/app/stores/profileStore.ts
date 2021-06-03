@@ -80,6 +80,7 @@ export default class ProfileStore {
     try {
       await agent.Profiles.setMainPhoto(photo.id);
       store.userStore.setImage(photo.url);
+      store.activityStore.updateAttendeeImage(this.profile!.username, photo.url)
       runInAction(() => {
         if (this.profile && this.profile.photos) {
           this.profile.photos.find((p) => p.isMain)!.isMain = false;
@@ -114,6 +115,7 @@ export default class ProfileStore {
     this.loading = true;
     try {
       await agent.Profiles.updateProfile(profile);
+      store.activityStore.updateAttendeeDisplayName(this.profile!.username, profile )
       runInAction(() => {
         if (
           profile.displayName &&

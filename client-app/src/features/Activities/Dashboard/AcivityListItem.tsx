@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { observer } from "mobx-react-lite";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Accordion, Button, Icon, Item, Label, Segment,  } from "semantic-ui-react";
@@ -98,4 +99,4 @@ const ActivityListItem = ({ activity }: Props) => {
   );
 };
 
-export default ActivityListItem;
+export default observer(ActivityListItem);
