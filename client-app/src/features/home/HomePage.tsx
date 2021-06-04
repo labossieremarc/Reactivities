@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { Link } from "react-router-dom";
-import { Container, Header, Segment, Image, Button } from "semantic-ui-react";
+import { Container, Header, Segment, Image, Button, Divider, Icon } from "semantic-ui-react";
 import { useStore } from "../../app/stores/store";
 import LoginForm from "../users/LoginForm";
 import RegisterForm from "../users/RegisterForm";
@@ -42,8 +42,15 @@ const HomePage = () => {
               size="huge"
               inverted
             >
-              Register
+                Register
             </Button>
+              <Divider horizontal inverted content="Or" />
+              <Button
+                loading={userStore.fbLoading}
+                size='huge'
+                inverted
+                color='facebook'
+                onClick={userStore.facebookLogin}><Icon name='facebook' size='large'/>Login With Facebook</Button>
           </>
         )}
       </Container>
