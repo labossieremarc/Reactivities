@@ -17,7 +17,6 @@ const ActivityListItem = ({ activity }: Props) => {
   const accordianHandle = () => {
     setActiveIndex(prevState => !prevState)
   }
-  const styles = {background: 'blue'}
   return (
     <Segment.Group>
       <Segment>
