@@ -1,10 +1,10 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import { Activity, ActivityFormValues } from "../models/actvity";
-import { history } from '../../index'
+import { history } from "../../index";
 import { store } from "../stores/store";
 import { User, UserFormValues } from "../models/user";
-import {Photo, Profile, UserActivity} from '../models/profile'
+import { Photo, Profile, UserActivity } from "../models/profile";
 import { PaginatedResult } from "../models/pagination";
 
 const sleep = (delay: number) => {
@@ -15,47 +15,59 @@ const sleep = (delay: number) => {
 
 axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 
-axios.interceptors.request.use(config => {
+axios.interceptors.request.use((config) => {
   const token = store.commonStore.token;
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
-})
-
-
-axios.interceptors.response.use(async (response) => {
-  if(process.env.NODE_ENV === 'development')await sleep(1000);
-  const pagination = response.headers['pagination'];
-  if (pagination) {
-    response.data = new PaginatedResult(response.data, JSON.parse(pagination));
-    return response as AxiosResponse<PaginatedResult<any>>;
-  }
-    return response;
-}, (error: AxiosError) => {
-  const { data, status, config } = error.response!;
-  switch (status) {
-    case 400:
-      if (typeof data === 'string') toast.error(data);
-      if (config.method === 'get' && data.errors.hasOwnProperty('id')) {
-        history.push('/not-found')
-      }
-      if (data.errors) {
-        const modalStateErrors = Object.values(data.errors);
-        throw modalStateErrors.flat()
-      }
-      break;
-    case 401:
-      toast.error("Unauthorized");
-      break;
-    case 404:
-      history.push('/not-found')
-      break;
-    case 500:
-      store.commonStore.setServerError(data);
-      history.push('/server-error')
-      break;
-  }
-  return Promise.reject(error);
 });
+
+axios.interceptors.response.use(
+  async (response) => {
+    if (process.env.NODE_ENV === "development") await sleep(1000);
+    const pagination = response.headers["pagination"];
+    if (pagination) {
+      response.data = new PaginatedResult(
+        response.data,
+        JSON.parse(pagination)
+      );
+      return response as AxiosResponse<PaginatedResult<any>>;
+    }
+    return response;
+  },
+  (error: AxiosError) => {
+    const { data, status, config, headers } = error.response!;
+    switch (status) {
+      case 400:
+        if (typeof data === "string") toast.error(data);
+        if (config.method === "get" && data.errors.hasOwnProperty("id")) {
+          history.push("/not-found");
+        }
+        if (data.errors) {
+          const modalStateErrors = Object.values(data.errors);
+          throw modalStateErrors.flat();
+        }
+        break;
+      case 401:
+        if (
+          status === 401 &&
+          headers["www-authenticate"].startsWith('Bearer error="invalid_token"')
+        ) {
+          store.userStore.logout();
+          toast.error("Session expired - please login");
+        }
+        toast.error("Unauthorized");
+        break;
+      case 404:
+        history.push("/not-found");
+        break;
+      case 500:
+        store.commonStore.setServerError(data);
+        history.push("/server-error");
+        break;
+    }
+    return Promise.reject(error);
+  }
+);
 
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
 
@@ -68,21 +80,28 @@ const requests = {
 };
 
 const Activities = {
-  list: (params: URLSearchParams) => axios.get<PaginatedResult<Activity[]>>("/activities", {params}).then(responseBody),
+  list: (params: URLSearchParams) =>
+    axios
+      .get<PaginatedResult<Activity[]>>("/activities", { params })
+      .then(responseBody),
   details: (id: string) => requests.get<Activity>(`/activities/${id}`),
-  create: (activity: ActivityFormValues) => requests.post<void>("/activities", activity),
+  create: (activity: ActivityFormValues) =>
+    requests.post<void>("/activities", activity),
   update: (activity: ActivityFormValues) =>
     requests.put<void>(`/activities/${activity.id}`, activity),
   delete: (id: string) => requests.del<void>(`/activities/${id}`),
-  attend: (id: string) => requests.post<void>(`/activities/${id}/attend`, {})
+  attend: (id: string) => requests.post<void>(`/activities/${id}/attend`, {}),
 };
 
 const Account = {
-  current: () => requests.get<User>('/account'),
-  login: (user: UserFormValues) => requests.post<User>('/account/login', user),
-  register: (user: UserFormValues) => requests.post<User>('/account/register', user),
-  fbLogin: (accessToken: string) => requests.post<User>(`/account/fbLogin?accessToken=${accessToken}`, {})
-}
+  current: () => requests.get<User>("/account"),
+  login: (user: UserFormValues) => requests.post<User>("/account/login", user),
+  register: (user: UserFormValues) =>
+    requests.post<User>("/account/register", user),
+  fbLogin: (accessToken: string) =>
+    requests.post<User>(`/account/fbLogin?accessToken=${accessToken}`, {}),
+  refreshToken: () => requests.post<User>("/account/refreshToken", {}),
+};
 const Profiles = {
   selected: (username: string) =>
     requests.get<Profile>(`/profiles/${username}`),
@@ -101,13 +120,15 @@ const Profiles = {
   listFollowing: (username: string, predicate: string) =>
     requests.get<Profile[]>(`/follow/${username}?predicate=${predicate}`),
   listActivites: (username: string, predicate: string) =>
-    requests.get<UserActivity[]>(`/profiles/${username}/activities?predicate=${predicate}`),
+    requests.get<UserActivity[]>(
+      `/profiles/${username}/activities?predicate=${predicate}`
+    ),
 };
 
 const agent = {
   Activities,
   Account,
-  Profiles
+  Profiles,
 };
 
 export default agent;

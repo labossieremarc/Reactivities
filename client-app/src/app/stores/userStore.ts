@@ -1,4 +1,3 @@
-import { access } from "fs";
 import { makeAutoObservable, runInAction } from "mobx";
 import { history } from "../..";
 import agent from "../api/agent";
@@ -9,6 +8,7 @@ export default class UserStore {
   user: User | null = null;
   fbAccessToken: string | null = null;
   fbLoading: boolean = false;
+  refreshTokenTimeOut: any;
 
   constructor() {
     makeAutoObservable(this);
@@ -22,6 +22,7 @@ export default class UserStore {
     try {
       const user = await agent.Account.login(creds);
       store.commonStore.setToken(user.token);
+      this.startRefreshTokenTimer(user);
       runInAction(() => (this.user = user));
       history.push("/activities");
       store.modalStore.closeModal();
@@ -41,7 +42,9 @@ export default class UserStore {
   getUser = async () => {
     try {
       const user = await agent.Account.current();
+      store.commonStore.setToken(user.token);
       runInAction(() => (this.user = user));
+      this.startRefreshTokenTimer(user);
     } catch (error) {
       console.log(error);
     }
@@ -50,6 +53,7 @@ export default class UserStore {
     try {
       const user = await agent.Account.register(creds);
       store.commonStore.setToken(user.token);
+      this.startRefreshTokenTimer(user);
       runInAction(() => (this.user = user));
       history.push("/activities");
       store.modalStore.closeModal();
@@ -65,28 +69,31 @@ export default class UserStore {
   };
 
   getFacebookLoginStatus = async () => {
-    window.FB.getLoginStatus(response => {
-      if (response.status === 'connected') {
+    window.FB.getLoginStatus((response) => {
+      if (response.status === "connected") {
         this.fbAccessToken = response.authResponse.accessToken;
       }
-    })
-  }
+    });
+  };
 
   facebookLogin = () => {
     this.fbLoading = true;
     const apiLogin = (accessToken: string) => {
-      agent.Account.fbLogin(accessToken).then(user => {
-        store.commonStore.setToken(user.token);
-        runInAction(() => {
-          this.user = user;
-          this.fbLoading = false;
+      agent.Account.fbLogin(accessToken)
+        .then((user) => {
+          store.commonStore.setToken(user.token);
+          this.startRefreshTokenTimer(user);
+          runInAction(() => {
+            this.user = user;
+            this.fbLoading = false;
+          });
+          history.push("/activities");
         })
-        history.push('/activities')
-      }).catch(error => {
-        console.log(error);
-        runInAction(() => this.fbLoading = false);
-      })
-    }
+        .catch((error) => {
+          console.log(error);
+          runInAction(() => (this.fbLoading = false));
+        });
+    };
 
     if (this.fbAccessToken) {
       apiLogin(this.fbAccessToken);
@@ -99,4 +106,28 @@ export default class UserStore {
       );
     }
   };
+
+  refreshToken = async () => {
+    this.stopRefreahTokenTimer();
+    try {
+      const user = await agent.Account.refreshToken();
+      runInAction(() => this.user = user);
+      store.commonStore.setToken(user.token);
+      this.startRefreshTokenTimer(user);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  private startRefreshTokenTimer(user: User) {
+    const jwtToken = JSON.parse(atob(user.token.split('.')[1]))
+    const expires = new Date(jwtToken.exp * 1000)
+    const timeout = expires.getTime() - Date.now() - (60 * 1000);
+    this.refreshTokenTimeOut = setTimeout(this.refreshToken, timeout);
+  }
+
+
+  private stopRefreahTokenTimer() {
+    clearTimeout(this.refreshTokenTimeOut);
+  }
 }
